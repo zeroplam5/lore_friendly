@@ -53,11 +53,18 @@ function collectInternalContext(targets: CheckRequest['targets']): LabeledScene[
 
 export async function runCheckPipeline(request: CheckRequest): Promise<CheckResponse> {
   const confirmedSettings = request.confirmedSettings ?? [];
-  const activeBaselines = filterActiveBaselines(MARVEL_BASELINE, confirmedSettings);
 
-  const combinedTargetText = request.targets.map((t) => t.content).join('\n\n');
-  const queryEmbedding = await embedText(combinedTargetText);
-  const relevantBaselines = searchRelevantBaselines(queryEmbedding, activeBaselines, 2);
+  let relevantBaselines: CanonicalBaseline[];
+  if (request.selectedBaselines) {
+    // 작가가 자료실에서 체크박스로 직접 고른 기준 설정 — 자동 임베딩 검색을 건너뛴다.
+    // 커스텀 기준 설정은 서버(marvel_baseline.json)에 없으므로 객체 전체를 그대로 신뢰한다.
+    relevantBaselines = filterActiveBaselines(request.selectedBaselines, confirmedSettings);
+  } else {
+    const activeBaselines = filterActiveBaselines(MARVEL_BASELINE, confirmedSettings);
+    const combinedTargetText = request.targets.map((t) => t.content).join('\n\n');
+    const queryEmbedding = await embedText(combinedTargetText);
+    relevantBaselines = searchRelevantBaselines(queryEmbedding, activeBaselines, 2);
+  }
 
   const internalContextScenes = collectInternalContext(request.targets);
 

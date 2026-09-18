@@ -1,5 +1,5 @@
 // 검증 AI API 스키마 — ai.md §2 (검증 요청/응답)
-import type { ConfirmedSetting } from './canon';
+import type { CanonicalBaseline, ConfirmedSetting } from './canon';
 
 /** ScopeTabs: 장면 / 챕터 / 작품 전체 */
 export type ValidationScope = 'SCENE' | 'CHAPTER' | 'PROJECT';
@@ -22,6 +22,13 @@ export interface CheckRequest {
   targets: CheckTarget[];
   /** 작가가 확정한 설정 목록 */
   confirmedSettings?: ConfirmedSetting[];
+  /**
+   * 작가가 자료실 › 작품 설정에서 체크박스로 직접 고른, 이번 검증에 사용할 기준 설정 전체 목록
+   * (사용자가 만든 커스텀 기준 설정은 서버에 없으므로 id가 아니라 객체 전체를 전달한다).
+   * 제공되면 서버의 자동 임베딩 유사도 검색(top-2)을 건너뛰고 이 목록을 그대로 사용한다.
+   * 생략 시(과거 호출과의 호환) 기존 자동 검색 동작을 그대로 유지한다.
+   */
+  selectedBaselines?: CanonicalBaseline[];
 }
 
 /** INTERNAL_CONTRADICTION: 작품 내부 모순 / DIVERGENCE: 원작과 차이 / INFO: 확인 필요 */

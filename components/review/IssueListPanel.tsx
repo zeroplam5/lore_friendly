@@ -8,7 +8,7 @@ import { IssueCard } from './IssueCard';
 import { FilterPill } from '@/components/ui/FilterPill';
 import { useIssueStore, countByStatus } from '@/stores/useIssueStore';
 import { useDraftStore } from '@/stores/useDraftStore';
-import { useCanonStore } from '@/stores/useCanonStore';
+import { useCanonStore, useSelectedBaselinesForValidation } from '@/stores/useCanonStore';
 import { buildCheckTargets } from '@/lib/buildCheckTargets';
 import { runCheck } from '@/lib/checkClient';
 import type { IssueStatus, ValidationScope } from '@/types';
@@ -18,6 +18,7 @@ export function IssueListPanel() {
   const selectedChapterId = useDraftStore((s) => s.selectedChapterId);
   const selectedSceneId = useDraftStore((s) => s.selectedSceneId);
   const confirmedSettings = useCanonStore((s) => s.confirmedSettings);
+  const selectedBaselines = useSelectedBaselinesForValidation();
 
   const issues = useIssueStore((s) => s.issues);
   const scope = useIssueStore((s) => s.scope);
@@ -45,6 +46,7 @@ export function IssueListPanel() {
         sceneId: nextScope === 'SCENE' ? selectedSceneId : undefined,
         targets,
         confirmedSettings,
+        selectedBaselines,
       });
       setIssues(response.issues, response.meta.isFallback, nextScope);
     } catch (error) {

@@ -7,7 +7,7 @@ import { Loader2, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useDraftStore, findScene } from '@/stores/useDraftStore';
-import { useCanonStore } from '@/stores/useCanonStore';
+import { useCanonStore, useSelectedBaselinesForValidation } from '@/stores/useCanonStore';
 import { useIssueStore } from '@/stores/useIssueStore';
 import { runCheck } from '@/lib/checkClient';
 import { cn } from '@/lib/cn';
@@ -28,6 +28,7 @@ export function DocumentEditor({ isFocusMode, onEnterFocusMode, onExitFocusMode 
   const selectedSceneId = useDraftStore((s) => s.selectedSceneId);
   const updateSceneContent = useDraftStore((s) => s.updateSceneContent);
   const confirmedSettings = useCanonStore((s) => s.confirmedSettings);
+  const selectedBaselines = useSelectedBaselinesForValidation();
   const setIssues = useIssueStore((s) => s.setIssues);
 
   const { chapter, scene } = findScene(project, selectedChapterId, selectedSceneId);
@@ -64,6 +65,7 @@ export function DocumentEditor({ isFocusMode, onEnterFocusMode, onExitFocusMode 
         sceneId: scene.id,
         targets: [{ chapterId: chapter.id, sceneId: scene.id, content: draft }],
         confirmedSettings,
+        selectedBaselines,
       });
       setIssues(response.issues, response.meta.isFallback, 'SCENE');
       router.push('/review');

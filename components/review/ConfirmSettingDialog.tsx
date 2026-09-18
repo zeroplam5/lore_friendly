@@ -5,8 +5,7 @@ import { useMemo, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { useDraftStore, findScene } from '@/stores/useDraftStore';
-import { getEffectiveBaselines } from '@/stores/useCanonStore';
-import { useCanonStore } from '@/stores/useCanonStore';
+import { useCanonStore, useAllBaselines, getEffectiveBaselines } from '@/stores/useCanonStore';
 import type { ConfirmedSetting, IssueItem } from '@/types';
 
 const AiTag = () => (
@@ -34,10 +33,11 @@ export function ConfirmSettingDialog({
 }) {
   const project = useDraftStore((s) => s.project);
   const confirmedSettings = useCanonStore((s) => s.confirmedSettings);
+  const allBaselines = useAllBaselines();
   const { chapter, scene } = findScene(project, issue.chapterId, issue.sceneId);
   const effectiveBaselines = useMemo(
-    () => getEffectiveBaselines(confirmedSettings),
-    [confirmedSettings]
+    () => getEffectiveBaselines(allBaselines, confirmedSettings),
+    [allBaselines, confirmedSettings]
   );
 
   const suggestedBaseline = effectiveBaselines.find(
