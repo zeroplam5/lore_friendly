@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply bg-background text-text-primary;
+  }
+
+  body {
+    font-feature-settings: 'tnum';
+  }
+}
+
+/* 원고 본문 전용 — docs/ui_ux.md §1.2 (line-height 2, 단락 gap 24px) */
+.prose-manuscript {
+  font-size: 15px;
+  line-height: 2;
+}
+
+.prose-manuscript p + p {
+  margin-top: 24px;
+}
+
+/* 문제 구절 하이라이트 — 물결 밑줄 (docs/ui_ux.md §3.3) */
+.highlight-issue {
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}

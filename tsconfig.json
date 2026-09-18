@@ -35,8 +35,11 @@
     "data",
     "lib",
     "app",
+    "components",
+    "stores",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "tailwind.config.ts"
   ],
   "exclude": [
     "node_modules"

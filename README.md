@@ -99,7 +99,7 @@ AI는 판정하지 않고 제안만 합니다. 모든 결정권은 작가에게 
 
 ## 진행 상태
 
-**기획 및 설계 단계** → **1차 개발(데이터 모델링)** → **2차 개발(백엔드/검증 AI 파이프라인)** 까지 완료되었습니다. 다음 단계는 **3차 개발(프론트엔드 UI)** 입니다.
+**기획 및 설계 단계** → **1차 개발(데이터 모델링)** → **2차 개발(백엔드/검증 AI 파이프라인)** → **3차 개발(프론트엔드 UI)** 까지 완료되었습니다.
 
 ### 1차 개발 — 데이터 모델링 (완료)
 
@@ -139,6 +139,34 @@ Next.js App Router를 스캐폴딩하고 `POST /api/check`가 실제 Gemini를 �
 
 > 테스트 시 유의: curl 등으로 한글 본문을 직접 전달할 때 터미널/쉘 인코딩이 UTF-8이 아니면 본문이 깨져 Gemini가 엉뚱한 구절을 인용하는 것처럼 보일 수 있습니다(파이프라인 버그 아님) — UTF-8로 저장된 파일을 `--data-binary @file` 등으로 전달해 확인하세요.
 
+### 3차 개발 — 프론트엔드 UI (완료)
+
+`design/DESIGN.md`·`docs/ui_ux.md`에 확정된 디자인 시스템·레이아웃 규격을 그대로 구현해 집필/검토/자료실/내보내기 4개 화면을 완성했습니다. Tailwind CSS, Zustand(localStorage 영속화), pdf-lib, Radix UI(Dialog/Popover/Tabs), lucide-react를 새로 도입했습니다.
+
+**구현 내용**
+- `stores/` — `useDraftStore`(원고), `useCanonStore`(기준/확정 설정), `useIssueStore`(쟁점/해결 이력), `useLibraryStore`(자료실), `useNotesStore`(구상함·메모 등 비공식 보강 데이터, 별도 키)로 `Backend&DB.md §5`의 localStorage 스키마(`lore_current_draft`, `lore_confirmed_settings`, `lore_issue_resolutions`)를 그대로 따르되 확정 데이터 모델(`types/*.ts`)은 전혀 수정하지 않음
+- `app/write` — 3패널 집필 화면. 하이라이트 렌더 없는 입력 전용 에디터(자동저장 디바운스, 글자수 진행바) + 집중 모드
+- `app/review` — 검토 화면(데모 핵심). `ScopeTabs`+상태 필터, 물결 하이라이트가 있는 읽기 전용 문서 시트, 인스펙터의 4갈래 액션(원고 반영/설정 확정/문제없음/보류) 전부 실제 동작
+- `app/library` — 참고자료/작품설정 서브탭 + ⚙️ 아이콘으로 진입하는 좌우 패널 없는 "작품 기본 설정" 3번째 서브뷰
+- `app/export` — CSS A5 미리보기 + 목업 진행률(0→49%) 후 `public/samples/Lore_Friendly_Sample.pdf`에 Canon Index 부록 페이지를 동적 병합해 다운로드 (`Backend&DB.md §7.3` 원안 그대로)
+- 반응형: `xl(1280px)` 미만에서 좌/우 패널이 슬라이드 오버레이(`SidePanelSheet`)로 전환되고 하단 탭바가 나타남 (`ThreePanelLayout` 공용 셸)
+- `write`/`review`는 상태·렌더 로직을 완전히 분리(각자 `components/write/*`, `components/review/*`)해 하이라이트 동기화 버그 가능성을 원천 차단 — 원고 편집은 write에서만, 쟁점 액션에 의한 원고 갱신은 review의 "원고에 제안 반영"에서만 발생
+
+**문서 스펙과 달라진 점 / 사용자 확정 의사결정**
+| 항목 | 문서/원안 | 실제 적용 | 사유 |
+|---|---|---|---|
+| Canon Index 부록 폰트 | 미명시 | pdf-lib 기본 `StandardFonts` 대신 `@pdf-lib/fontkit` + Pretendard TTF 임베드 | 한글은 WinAnsi 인코딩(StandardFonts)로 표현 불가 — 실제 다운로드 시 `WinAnsi cannot encode` 런타임 에러 발생을 실사용 검증 중 확인 후 수정 |
+| 작품 기본 설정 진입 | SubNavTabs 2개(참고자료/작품설정)만 명시 | ⚙️ 아이콘으로 진입하는 좌우 패널 없는 3번째 서브뷰로 구현 | 스크린샷상 `library-basic-settings`가 별도 단일 카드 레이아웃이라 사용자와 협의해 확정 |
+| 집필 에디터 툴바 | B/I/이미지/메모/히스토리/검색 등 다건 | "현재 장면 검증" 버튼 + 글자수만 구현 | 사용자 요청으로 단순화, 버그 표면적 최소화 |
+| 구상함·장면 메모·현재 작업 단계 | 화면에는 존재하나 확정 데이터 모델(1차 개발)에 스키마 없음 | `lore_scene_notes`라는 별도 non-canonical localStorage 키로 시각적 완성도만 채움 | 1차 개발에서 확정된 `types/*.ts` 스키마를 3차 개발에서 임의로 확장하지 않기로 함 |
+
+**실사용 검증 (Playwright로 헤드리스 브라우저 구동 확인)**: `npm run dev` 구동 후 데모 시나리오 전체(장면 선택 → 검증 실행 → 실제 Gemini 응답 수신 → 원고에 제안 반영 → 설정으로 확정 → 토스트/실행취소 → 자료실 → 내보내기 다운로드)를 실제로 클릭-스루해 콘솔 에러 없이 동작함을 확인. 이 과정에서 (1) `ProgressBar` 기본 클래스와 호출부 클래스가 충돌해 글자수 표시가 깨지는 문제를 발견해 `tailwind-merge` 도입으로 수정, (2) 위 표의 한글 폰트 인코딩 문제를 발견해 수정 — 두 건 모두 `npm run typecheck`/`npm run build`로는 잡히지 않고 실제 브라우저 구동 시에만 드러난 버그였습니다.
+
+**알려진 제약 (MVP 단순화)**
+- 쟁점 목록(`issues`)은 세션 한정 상태로, `ConfirmedSetting`(캐논 반영)과 `IssueResolution`(문제없음/보류)만 새로고침 후에도 유지됨 — `CONFIRMED`/`RESOLVED` 뱃지 자체는 새로고침 시 초기화됨
+- "작품 설정으로 확정" 시 대체할 기준 설정 자동 추천은 인용문 앞 10자 일치라는 단순 휴리스틱 — 못 찾으면 수동 선택으로 폴백
+- "승인 대기 제안" 섹션은 확정 데이터 모델에 없는 상태라 구현하지 않음(가짜 데이터 대신 생략)
+
 ### 코드 구조
 
 ```
@@ -166,8 +194,23 @@ lib/
 └── checkPipeline.ts    — 검증 파이프라인 오케스트레이션(runCheckPipeline)
 
 app/
-├── layout.tsx, page.tsx      — 최소 루트 레이아웃 (UI는 3차 개발 범위)
+├── layout.tsx, globals.css   — 루트 레이아웃(폰트/네비게이션) + Tailwind 진입점
+├── page.tsx                  — "/write"로 redirect
+├── write/page.tsx             — 집필
+├── review/page.tsx            — 검토
+├── library/page.tsx           — 자료실(참고자료/작품설정/기본설정)
+├── export/page.tsx            — 내보내기
 └── api/check/route.ts        — POST /api/check (요청 검증 + 6초 타임아웃 Race + Fail-Safe)
+
+components/
+├── ui/          — 공용 프리젠테이션(Badge, Button, Modal, Popover, FilterPill, ProgressBar, Toast, SidePanelSheet)
+├── layout/      — GlobalNavBar, BottomTabBar, ThreePanelLayout(반응형 3패널 셸)
+├── write/       — ChapterTree, IdeaBox, DocumentEditor, SceneMemoPanel (입력 전용, 하이라이트 렌더 없음)
+├── review/      — IssueListPanel, DocumentSheet, InspectorPanel, ConfirmSettingDialog, NoIssuePopover, SourceCard (읽기 전용 렌더 + 액션)
+├── library/     — LibrarySubNav, ReferencesView, SettingsView, BasicSettingsView, LibraryAddDialog
+└── export/      — ExportSidebar, ExportPreview
+
+stores/          — useDraftStore, useCanonStore, useIssueStore, useLibraryStore, useNotesStore (Zustand + persist)
 
 scripts/
 └── generate-baseline-embeddings.mjs  — baseline embedding 재생성 (npm run embed:baseline)
