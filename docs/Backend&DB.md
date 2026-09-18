@@ -154,9 +154,9 @@ export interface IssueResolution {
   ```
 
 * **처리 파이프라인**:
-  1. `marvel_baseline.json`에서 `confirmedSettings`에 의해 대체된 규칙 필터링.
+  1. `marvel_baseline.json`(+ 요청에 포함된 `selectedBaselines`)에서 `confirmedSettings`에 의해 대체된 규칙 필터링.
   2. `targets[].content`에서 핵심 키워드(엔티티) 추출 (장면별로 반복).
-  3. 경량 벡터 연산(유사도 상위 2개 청크 선정).
+  3. 경량 벡터 연산(유사도 상위 2개 청크 선정) — **단, 요청에 `selectedBaselines`가 있으면 이 자동 검색을 건너뛰고 그 목록을 그대로 사용** (3차 개발 추가: 자료실 › 작품 설정 체크박스로 작가가 직접 검증 대상을 고르는 기능, `ai.md §1·§2.1` 참조).
   4. Gemini 1.5 Flash에 System Prompt 및 Context 주입 후 구조화된 JSON 요청.
   5. API 타임아웃(**3초**) 발생 시 즉각 `DEMO_FALLBACK_RESPONSE` 반환.
 
@@ -238,7 +238,10 @@ export function searchRelevantBaselines(
 
 * **Key 관리**:
   * `lore_current_draft`: 현재 집필 중인 원고 텍스트 및 챕터 트리
-  * `lore_confirmed_settings`: 작가가 승인한 `ConfirmedSetting[]` 목록
+  * `lore_confirmed_settings`: 작가가 승인한 `ConfirmedSetting[]` 목록. **(3차 개발 추가)** 같은 키에 아래 필드도 함께 저장:
+    * `customBaselines`: 작가가 자료실에서 직접 만든 `CanonicalBaseline[]` (marvel_baseline.json에는 없는, 클라이언트 전용 데이터)
+    * `hiddenBaselineIds`: 삭제된 기준 설정 id 목록 (built-in은 원본 JSON을 지울 수 없어 숨김 처리, 커스텀은 배열에서 완전히 제거)
+    * `disabledBaselineIds`: 체크 해제되어 다음 검증 요청(`selectedBaselines`, `ai.md §2.1`)에서 제외되는 기준 설정 id 목록 — 삭제와는 별개의 토글
   * `lore_issue_resolutions`: 특정 구절 무시(`IGNORED`) 및 보류(`DEFERRED`) 상태를 장면 단위로 저장하는 `IssueResolution[]` 목록 (§2.1-D)
 
 ```typescript

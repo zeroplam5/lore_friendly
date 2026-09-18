@@ -27,6 +27,8 @@ UI 렌더링                     Demo Fallback Mock 즉각 반환 (0.1s)
 (Wavy 하이라이트 & 인스펙터 바인딩)
 ```
 
+> **3차 개발에서 추가**: 위 "Top-2 연관 기준 설정 주입"은 클라이언트가 `selectedBaselines`를 보내지 않은 경우의 기본(자동) 동작입니다. 자료실 › 작품 설정 화면에서 작가가 기준 설정마다 체크박스로 "이번 검증에 포함" 여부를 직접 고를 수 있고, 체크된 목록이 `selectedBaselines`로 전달되면 1단계의 임베딩 유사도 검색을 건너뛰고 그 목록을 그대로 사용합니다 — §2.1 참조.
+
 ---
 
 ## 2. API 데이터 스키마 명세
@@ -49,8 +51,11 @@ export interface CheckRequest {
     content: string;              // 해당 장면의 에디터 본문 전체 텍스트
   }[];                             // scope='SCENE'→1건 / 'CHAPTER'→해당 챕터 전체 장면 / 'PROJECT'→작품 전체 장면
   confirmedSettings?: ConfirmedSetting[]; // 작가가 확정한 설정 목록
+  selectedBaselines?: CanonicalBaseline[]; // (3차 개발 추가) 작가가 자료실에서 체크박스로 직접 고른 기준 설정 전체 목록
 }
 ```
+
+`selectedBaselines`가 오면 서버는 자동 임베딩 유사도 검색(top-2)을 건너뛰고 이 목록을 그대로 검증 근거로 사용합니다. 작가가 자료실에서 직접 만든 커스텀 기준 설정은 서버(`marvel_baseline.json`)에 존재하지 않으므로 id가 아니라 `CanonicalBaseline` 객체 전체를 전달합니다. 필드를 생략하면(과거 호출과의 호환) 기존 자동 검색 동작을 그대로 유지합니다.
 
 ### 2.2 검증 응답 (`CheckResponse`)
 
