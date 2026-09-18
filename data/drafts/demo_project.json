@@ -1,0 +1,80 @@
+{
+  "id": "cube-alt-possibility",
+  "title": "푸른 큐브의 다른 가능성",
+  "author": "서하윤",
+  "universeConfig": {
+    "baselineUniverse": "Earth-616 + MCU 혼합",
+    "complianceLevel": "PERMISSIVE",
+    "referencedWorks": [
+      "Avengers (2012)",
+      "Captain America: The First Avenger",
+      "Thor (2011)",
+      "Agents of S.H.I.E.L.D."
+    ]
+  },
+  "chapters": [
+    {
+      "id": "ch1",
+      "title": "제1장: 잃어버린 유산",
+      "order": 1,
+      "scenes": [
+        {
+          "id": "scene1",
+          "title": "장면 1",
+          "order": 1,
+          "content": "하워드 스타크는 대서양 밑바닥에서 건져 올린 상자를 조심스레 열었다. 안에는 아무도 예상하지 못한 푸른 빛이 새어 나오고 있었다.",
+          "lastSaved": "2026-09-12T10:00:00+09:00"
+        },
+        {
+          "id": "scene2",
+          "title": "장면 2",
+          "order": 2,
+          "content": "하워드는 상자를 실험실 금고 깊숙이 넣어두었다. 페기 카터에게조차 그 존재를 완전히 알리지 않았다.",
+          "lastSaved": "2026-09-12T10:20:00+09:00"
+        },
+        {
+          "id": "scene3",
+          "title": "장면 3",
+          "order": 3,
+          "content": "실험실 조명이 꺼진 뒤에도 상자는 스스로 빛을 냈다. 그 푸른 광채가 실내 온도마저 떨어뜨리는 듯한 서늘한 색상이었다고 기록되었다.",
+          "lastSaved": "2026-09-12T11:00:00+09:00"
+        }
+      ]
+    },
+    {
+      "id": "ch2",
+      "title": "제2장: 하이드라의 그림자",
+      "order": 2,
+      "scenes": [
+        {
+          "id": "scene1",
+          "title": "장면 1",
+          "order": 1,
+          "content": "",
+          "lastSaved": "2026-09-13T09:00:00+09:00"
+        }
+      ]
+    },
+    {
+      "id": "ch3",
+      "title": "제3장: 하이드라의 각성",
+      "order": 3,
+      "scenes": [
+        {
+          "id": "scene1",
+          "title": "장면 1",
+          "order": 1,
+          "content": "레드 스컬은 오랜 추적 끝에 하이드라 연구소 지하 금고에서 상자를 되찾았다.",
+          "lastSaved": "2026-09-14T18:00:00+09:00"
+        },
+        {
+          "id": "scene2",
+          "title": "보르미르의 결정",
+          "order": 2,
+          "content": "스톤의 빛이 방 전체를 감쌌다. 붉은빛이 감도는 큐브는 스컬의 손 위에서 위태롭게 진동하고 있었다. 이전의 관측과는 완전히 달랐다. 시간을 되돌리는 듯한 파동을 내뿜자, 주변의 먼지들이 거꾸로 떠오르기 시작했다.",
+          "lastSaved": "2026-09-15T21:00:00+09:00"
+        }
+      ]
+    }
+  ]
+}

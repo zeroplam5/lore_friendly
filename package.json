@@ -1,0 +1,25 @@
+{
+  "name": "lore-friendly",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lore-Friendly — 2차 창작 작가를 위한 세계관 정합성 린터 (BYPP 해커톤 MVP)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "embed:baseline": "node --env-file=.env.local scripts/generate-baseline-embeddings.mjs"
+  },
+  "dependencies": {
+    "@google/genai": "^1.9.0",
+    "next": "^15.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "typescript": "^5.6.3"
+  }
+}
