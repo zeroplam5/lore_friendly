@@ -10,6 +10,7 @@ interface LibraryState {
   references: ReferenceMaterial[];
   addReference: (reference: ReferenceMaterial) => void;
   updateReferenceStatus: (id: string, status: ReferenceMaterial['status']) => void;
+  removeReference: (id: string) => void;
 }
 
 export const useLibraryStore = create<LibraryState>()(
@@ -22,6 +23,8 @@ export const useLibraryStore = create<LibraryState>()(
         set((state) => ({
           references: state.references.map((r) => (r.id === id ? { ...r, status } : r)),
         })),
+      removeReference: (id) =>
+        set((state) => ({ references: state.references.filter((r) => r.id !== id) })),
     }),
     { name: 'lore_library_references' }
   )

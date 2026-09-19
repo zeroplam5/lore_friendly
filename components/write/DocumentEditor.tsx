@@ -36,10 +36,45 @@ export function DocumentEditor({ isFocusMode, onEnterFocusMode, onExitFocusMode 
   const [draft, setDraft] = useState(scene?.content ?? '');
   const [isChecking, setIsChecking] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 디바운스 타이머가 아직 안 끝난 상태에서 장면 전환/탭 이동으로 이 컴포넌트가 언마운트되면
+  // setState 클로저가 유실돼 방금 입력한 내용이 조용히 사라진다 — pendingRef에 미반영 값을
+  // 들고 있다가 장면 전환·언마운트 시 즉시 flush한다.
+  const pendingRef = useRef<{ chapterId: string; sceneId: string; value: string } | null>(null);
+
+  const flushPending = () => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    if (pendingRef.current) {
+      const { chapterId, sceneId, value } = pendingRef.current;
+      updateSceneContent(chapterId, sceneId, value);
+      pendingRef.current = null;
+    }
+  };
 
   useEffect(() => {
     setDraft(scene?.content ?? '');
   }, [scene?.id]);
+
+  // 장면 전환/탭 이동(같은 앱 안에서의 언마운트)뿐 아니라, 새로고침·탭 닫기처럼 JS 실행
+  // 컨텍스트 자체가 종료되는 경우에도 대기 중인 자동저장이 유실되지 않도록 flush한다.
+  // beforeunload/pagehide는 언마운트 cleanup이 실행되지 않을 수 있어 별도로 등록한다.
+  useEffect(() => {
+    window.addEventListener('beforeunload', flushPending);
+    window.addEventListener('pagehide', flushPending);
+    return () => {
+      window.removeEventListener('beforeunload', flushPending);
+      window.removeEventListener('pagehide', flushPending);
+    };
+  });
+
+  useEffect(() => {
+    return () => {
+      flushPending();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapter?.id, scene?.id]);
 
   if (!chapter || !scene) {
     return <div className="flex h-full items-center justify-center text-text-tertiary">장면을 선택하세요.</div>;
@@ -47,14 +82,17 @@ export function DocumentEditor({ isFocusMode, onEnterFocusMode, onExitFocusMode 
 
   const handleChange = (value: string) => {
     setDraft(value);
+    pendingRef.current = { chapterId: chapter.id, sceneId: scene.id, value };
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       updateSceneContent(chapter.id, scene.id, value);
+      pendingRef.current = null;
+      debounceRef.current = null;
     }, AUTOSAVE_DELAY_MS);
   };
 
   const handleValidate = async () => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
+    flushPending();
     updateSceneContent(chapter.id, scene.id, draft);
     setIsChecking(true);
     try {

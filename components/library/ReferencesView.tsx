@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Plus, FileText, Link2, PenLine, AlertTriangle } from 'lucide-react';
+import { Plus, FileText, Link2, PenLine, AlertTriangle, Trash2 } from 'lucide-react';
 import { ThreePanelLayout } from '@/components/layout/ThreePanelLayout';
 import { Button } from '@/components/ui/Button';
 import { FilterPill } from '@/components/ui/FilterPill';
@@ -27,6 +27,7 @@ type FilterValue = 'ALL' | 'ORIGINAL' | 'DERIVED';
 export function ReferencesView() {
   const references = useLibraryStore((s) => s.references);
   const addReference = useLibraryStore((s) => s.addReference);
+  const removeReference = useLibraryStore((s) => s.removeReference);
   const inconsistencies = getInconsistencies();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -61,6 +62,14 @@ export function ReferencesView() {
   const selected = references.find((r) => r.id === selectedId) ?? references[0];
   const isNewUpload = selected.status === '추출 중';
 
+  const handleDelete = (id: string) => {
+    const remaining = references.filter((r) => r.id !== id);
+    removeReference(id);
+    if (selectedId === id) {
+      setSelectedId(remaining[0]?.id ?? null);
+    }
+  };
+
   return (
     <>
       <ThreePanelLayout
@@ -83,11 +92,11 @@ export function ReferencesView() {
                 const Icon = SOURCE_ICON[ref.sourceType];
                 const isHighlighted = inconsistencies.some((inc) => inc.involvedReferenceIds.includes(ref.id));
                 return (
-                  <button
+                  <div
                     key={ref.id}
                     onClick={() => setSelectedId(ref.id)}
                     className={cn(
-                      'flex flex-col gap-1 rounded-lg border p-2.5 text-left',
+                      'group flex cursor-pointer flex-col gap-1 rounded-lg border p-2.5 text-left',
                       ref.id === selected.id
                         ? 'border-brand-primary bg-brand-soft'
                         : isHighlighted
@@ -99,12 +108,21 @@ export function ReferencesView() {
                       <span className="text-[11px] font-semibold text-text-secondary">
                         {STATUS_LABEL[ref.status]}
                       </span>
-                      <span className="flex items-center gap-1 text-[11px] text-text-tertiary">
+                      <span className="flex items-center gap-1.5 text-[11px] text-text-tertiary">
                         <Icon size={11} /> {ref.sourceType}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(ref.id);
+                          }}
+                          className="opacity-0 hover:text-status-error-text group-hover:opacity-100"
+                        >
+                          <Trash2 size={12} />
+                        </button>
                       </span>
                     </div>
                     <p className="truncate text-[13px] font-medium text-text-primary">{ref.title}</p>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -154,6 +172,14 @@ export function ReferencesView() {
                 ))}
               </div>
             </div>
+
+            <Button
+              variant="danger-ghost"
+              className="flex items-center justify-center gap-1.5"
+              onClick={() => handleDelete(selected.id)}
+            >
+              <Trash2 size={14} /> 자료 삭제
+            </Button>
           </div>
         }
       >
